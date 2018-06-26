@@ -68,7 +68,7 @@ chown ldap. /var/lib/ldap/DB_CONFIG
 
 systemctl start  slapd.service
 if [ $? -eq 0 ]
-then echo "\033[32m slapd.service Success \033[0m"
+then echo -e "\033[32m slapd.service Success \033[0m"
 else exit 17
 fi
 
@@ -100,10 +100,11 @@ EOF
 
 ldapadd -x -D "cn=admin,cn=config" -w config -f ~/ldif/bdb.ldif -h localhost
 ldapsearch -x -b "cn=config" -D "cn=admin,cn=config" -w config -h localhost dn -LLL | grep -v ^$ |tail -1
+dc=example.org
+dcdc="dc=example,dc=org"
+sed -i 's/DEFAULT_MAIL_DOMAIN = "'$dc'"/DEFAULT_MAIL_DOMAIN = "'$DC0'"/' /usr/share/migrationtools/migrate_common.ph
 
-sed -i 's/DEFAULT_MAIL_DOMAIN = "example.org"/DEFAULT_MAIL_DOMAIN = "'$DC0'"/' /usr/share/migrationtools/migrate_common.ph
-
-sed -i 's/DEFAULT_BASE = "dc=example,dc=org"/DEFAULT_BASE = "dc='$DC0',dc='$DC1'"/' /usr/share/migrationtools/migrate_common.ph
+sed -i 's/DEFAULT_BASE = "'$dcdc'"/DEFAULT_BASE = "dc='$DC0',dc='$DC1'"/' /usr/share/migrationtools/migrate_common.ph
 
 
 #######ca
@@ -116,7 +117,7 @@ mkdir -p /ldapuser
 yum -y install nfs-utils.x86_64 rpcbind 
 
 cat >/etc/exports <<EOT
-/ldapuser 192.78.0.0/24(rw,sync)
+/ldapuser 192.168.78.0/24(rw,sync)
 EOT
 
 service rpcbind restart
