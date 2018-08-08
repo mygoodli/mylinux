@@ -1,0 +1,27 @@
+- hosts: web
+  vars:
+    worker_processes: 4
+    num_cpus: 1
+  remote_user: root
+  tasks:
+  - name: open the ulimit
+    shell: ulimit -HSn 65535
+  - name: copy nginx.pkg
+    copy: src=/root/playbooks/nginx/nginx-1.8.0-1.el7.ngx.x86_64.rpm dest=/etc/ansible/nginx/nginx-1.8.0-1.el7.ngx.x86_64.rpm
+  - name: yum install nginx
+    shell: yum localinstall -y /etc/ansible/nginx/nginx-1.8.0-1.el7.ngx.x86_64.rpm
+  - name: copy nginx.conf
+    template: src=/root/playbooks/nginx/nginx.conf dest=/etc/nginx/nginx.conf
+  - name: copy www.test.com.conf
+    copy: src=/root/playbooks/nginx/www.test.com.conf dest=/etc/nginx/conf.d/www.test.com.conf
+  - name: create /www/html directory
+    file: path=/www/html state=directory owner=nginx group=nginx
+  - name: create index
+    copy: src=/root/playbooks/nginx/index.html dest=/www/html/index.html
+  - name: start nginx
+    service: name=nginx state=restarted
+    notify:
+    - restart nginx
+  handlers:
+  - name: restart nginx
+    service: name=nginx state=restarted
